@@ -16,6 +16,14 @@ router.get('/', auth, (req, res) => { //Auth function goes in here
     });
 });
 
+router.get('/:id', auth, (req, res) => {
+    const { id } = req.params;
+    User.findById(id, function (err, userModel) {
+        if (err) return res.status(400).send({ err });
+        return res.send(userModel);
+    });
+});
+
 router.post('/token', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -43,6 +51,20 @@ router.post('/token', (req, res) => {
     });
 });
 
+router.patch('/', auth, (req, res) => {
+    const { password } = req.body;
+    if (!password) {
+        return res.status(400).send({ err: 'password is required' });
+    }
+
+    const currentUser = req.user;
+    currentUser.password = password;
+    currentUser.save(function (err) {
+        if (err) return res.status(400).send({ err });
+
+        return res.status(204).send();
+    });
+});
 
 router.post('/', (req, res) => {
     const { username, password } = req.body;
