@@ -6,22 +6,24 @@ import { secret, auth } from '../../config/passport';
 
 const router = Router();
 
-router.get('/', auth, (req, res) => { //Auth function goes in here
-    User.find({}, function (err, users) {
-        if (err) {
-            return res.status(500).send({ err });
-        }
+router.get('/', auth, (req, res) => {
+    User.find({}).select('-password').exec(
+        function (err, users) {
+            if (err) {
+                return res.status(500).send({ err });
+            }
 
-        return res.send(users);
-    });
+            return res.send(users);
+        });
 });
 
 router.get('/:id', auth, (req, res) => {
     const { id } = req.params;
-    User.findById(id, function (err, userModel) {
-        if (err) return res.status(400).send({ err });
-        return res.send(userModel);
-    });
+    User.findById(id).select('-password').exec(
+        function (err, userModel) {
+            if (err) return res.status(400).send({ err });
+            return res.send(userModel);
+        });
 });
 
 router.post('/token', (req, res) => {
@@ -82,7 +84,7 @@ router.post('/', (req, res) => {
         if (err) {
             return res.status(400).send({ err });
         }
-        return res.status(201).send(model);
+        return res.status(201).send(model.removePass());
     });
 });
 
