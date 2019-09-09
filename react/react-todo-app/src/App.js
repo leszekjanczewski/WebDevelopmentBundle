@@ -50,6 +50,30 @@ class App extends Component {
     this.setState({ newTodo: value })
   }
 
+  handleNewTodoKeyDown = event => {
+    if (this.state.todos.length >= 10) {
+      return
+    }
+
+    if (event.keyCode !== 13) {
+      return
+    }
+    event.preventDefault()
+
+    const { newTodo, todos } = this.state //Destructure
+    const value = newTodo.trim() //Get rid of white space at beginning and end
+    if (value) {
+      //Check the value isn't blank
+      this.setState({
+        todos: [
+          ...todos, //Copy the current todos in the array
+          { title: value, completed: false }, //Create a new array object
+        ],
+        newTodo: '', //Clear the input field
+      })
+    }
+  }
+
   render() {
     return (
       <div className="app">
@@ -61,6 +85,7 @@ class App extends Component {
             autoFocus
             value={this.state.newTodo}
             onChange={this.handleInputChange}
+            onKeyDown={this.handleNewTodoKeyDown}
           />
           <label
             htmlFor="new-todo"
