@@ -1,15 +1,27 @@
 import React, { Component } from 'react'
 import { Table, Checkbox, Button } from 'semantic-ui-react'
+
 import TodoItem from './TodoItem'
+
+const headers = {
+  'Content-Type': 'application/json',
+}
 
 class TodoApp extends Component {
   state = {
-    todos: [
-      { title: 'Learn React', completed: false },
-      { title: 'Learn Redux', completed: false },
-      { title: 'Learn React Native', completed: false },
-    ],
+    todos: [],
     newTodo: '',
+  }
+
+  componentDidMount() {
+    this.fetchTodos()
+  }
+
+  fetchTodos = () => {
+    fetch('http://localhost:4500/todos')
+      .then(data => data.json())
+      .then(todos => this.setState({ todos }))
+      .catch(err => console.error({ err }))
   }
 
   handleToggleAll = () => {
@@ -53,30 +65,40 @@ class TodoApp extends Component {
     const { newTodo, todos } = this.state
     const value = newTodo.trim()
     if (value) {
-      this.setState({
-        todos: [
-          ...todos,
-          { title: value, completed: false },
-        ],
-        newTodo: '',
+      fetch('http://localhost:4500/todos', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          title: value,
+          completed: false,
+        }),
       })
+        .then(this.fetchTodos)
+        .then(() => this.setState({ newTodo: '' }))
     }
   }
 
-  handleDelete = i => {
-    const { todos } = this.state
-    const todosWithoutDeletedTodo = todos.filter(
-      (t, index) => index !== i,
-    )
-    this.setState({ todos: todosWithoutDeletedTodo })
+  handleDelete = id => {
+    fetch(`http://localhost:4500/todos/${id}`, {
+      method: 'DELETE',
+      headers,
+    }).then(this.fetchTodos)
   }
 
   handleClearCompleted = () => {
     const { todos } = this.state
-    const incompleteTodos = todos.filter(
-      todo => !todo.completed,
+    const completedTodos = todos.filter(
+      todo => todo.completed,
     )
-    this.setState({ todos: incompleteTodos })
+
+    Promise.all(
+      completedTodos.map(todo =>
+        fetch(`http://localhost:4500/todos/${todo.id}`, {
+          method: 'DELETE',
+          headers,
+        }),
+      ),
+    ).then(this.fetchTodos)
   }
 
   render() {
@@ -129,7 +151,9 @@ class TodoApp extends Component {
                   handleToggle={() =>
                     this.handleTodoClick(todo, i)
                   }
-                  handleDelete={() => this.handleDelete(i)}
+                  handleDelete={() =>
+                    this.handleDelete(todo.id)
+                  }
                 />
               ))}
             </Table.Body>

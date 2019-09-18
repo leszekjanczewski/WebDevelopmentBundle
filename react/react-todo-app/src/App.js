@@ -14,4 +14,4 @@ class App extends Component {
   }
 }
 
-export default App //Remember to change the name here as well for the export
+export default App
