@@ -18,7 +18,7 @@ class TodoApp extends Component {
   }
 
   fetchTodos = () => {
-    fetch('http://localhost:4500/todos')
+    fetch('/todos')
       .then(data => data.json())
       .then(todos => this.setState({ todos }))
       .catch(err => console.error({ err }))
@@ -65,7 +65,7 @@ class TodoApp extends Component {
     const { newTodo, todos } = this.state
     const value = newTodo.trim()
     if (value) {
-      fetch('http://localhost:4500/todos', {
+      fetch('/todos', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -79,7 +79,7 @@ class TodoApp extends Component {
   }
 
   handleDelete = id => {
-    fetch(`http://localhost:4500/todos/${id}`, {
+    fetch(`/todos/${id}`, {
       method: 'DELETE',
       headers,
     }).then(this.fetchTodos)
@@ -93,7 +93,7 @@ class TodoApp extends Component {
 
     Promise.all(
       completedTodos.map(todo =>
-        fetch(`http://localhost:4500/todos/${todo.id}`, {
+        fetch(`/todos/${todo.id}`, {
           method: 'DELETE',
           headers,
         }),
